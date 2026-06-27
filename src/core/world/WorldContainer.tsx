@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import { WorldId, WORLD_REGISTRY } from "./world-registry";
 import { useWorldStore } from "./use-world-store";
+import AssemblyContainer from "../assembly/AssemblyContainer";
 
 interface WorldContainerProps {
   id: WorldId;
@@ -32,11 +33,13 @@ export default function WorldContainer({ id, isExiting = false }: WorldContainer
 
   return (
     <group name={`world-container-${id}`}>
-      <LazyComponent
-        isExiting={isExiting}
-        transitionProgress={transitionProgress}
-        opacity={opacity}
-      />
+      <AssemblyContainer isExiting={isExiting}>
+        <LazyComponent
+          isExiting={isExiting}
+          transitionProgress={transitionProgress}
+          opacity={opacity}
+        />
+      </AssemblyContainer>
     </group>
   );
 }

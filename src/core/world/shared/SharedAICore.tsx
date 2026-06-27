@@ -6,6 +6,9 @@ import * as THREE from "three";
 import gsap from "gsap";
 import { useWorldStore } from "../use-world-store";
 import { WorldId } from "../world-registry";
+import { useAssemblyRegister } from "../../assembly/use-assembly";
+import { useAudioStore, synth } from "../../audio/use-audio-store";
+import { useInteractiveObject } from "../../interaction/use-interaction";
 
 const VERTEX_COUNT = 1020;
 
@@ -206,6 +209,56 @@ export default function SharedAICore() {
 
   const activeWorldId = useWorldStore((state) => state.activeWorldId);
   const aiCoreConfig = useWorldStore((state) => state.aiCoreConfig);
+  const unlocked = useAudioStore((state) => state.unlocked);
+
+  // Register AI Core with the Procedural Assembly System
+  useAssemblyRegister({
+    id: "shared-ai-core-assembly",
+    ref: pointsRef,
+    stage: "mechanical",
+    animateIn: () => {
+      if (!pointsRef.current) return;
+      return gsap.fromTo(
+        pointsRef.current.scale,
+        { x: 0, y: 0, z: 0 },
+        {
+          x: aiCoreConfig.scale,
+          y: aiCoreConfig.scale,
+          z: aiCoreConfig.scale,
+          duration: 1.0,
+          ease: "back.out(1.5)",
+        }
+      );
+    },
+    animateOut: () => {
+      if (!pointsRef.current) return;
+      return gsap.to(
+        pointsRef.current.scale,
+        { x: 0, y: 0, z: 0, duration: 0.6, ease: "power2.in" }
+      );
+    },
+  });
+
+  // Trigger procedural AI Core audio pulses periodically
+  useEffect(() => {
+    if (!unlocked || !synth) return;
+    
+    // Play immediately and then repeat at 3s intervals
+    synth.playPulse();
+    const interval = setInterval(() => {
+      synth?.playPulse();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [unlocked]);
+
+  const { handlers } = useInteractiveObject({
+    id: "shared-ai-core",
+    tooltip: "Inspect cognitive neural core",
+    cameraPosition: [0, 2.3, 1.2],
+    cameraTarget: [0, 2.0, -1.0],
+    cameraFov: 35,
+  }, pointsRef);
 
   // Pre-calculate shape vertex buffers once
   const shapeBuffers = useMemo(() => {
@@ -307,7 +360,7 @@ export default function SharedAICore() {
   });
 
   return (
-    <points ref={pointsRef} name="shared-ai-core">
+    <points ref={pointsRef} name="shared-ai-core" {...handlers}>
       <bufferGeometry ref={geometryRef}>
         <bufferAttribute
           attach="attributes-position"

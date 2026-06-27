@@ -1,0 +1,29 @@
+[
+  {
+    "id": "gallery-project-01",
+    "title": "Ecosystem Orchestrator",
+    "subtitle": "Distributed Cloud Infrastructure",
+    "tech": ["Kubernetes", "Docker", "Node.js"],
+    "timeline": "Q1 - Q2 2026",
+    "shape": "sphere",
+    "position": [-2.5, 0.2, 0.8]
+  },
+  {
+    "id": "gallery-project-02",
+    "title": "Cognitive Synapse core",
+    "subtitle": "Neural Intelligence Node",
+    "tech": ["Python", "PyTorch", "Redis"],
+    "timeline": "Q2 - Q3 2026",
+    "shape": "cube",
+    "position": [0.0, 0.4, -0.6]
+  },
+  {
+    "id": "gallery-project-03",
+    "title": "Secure Client Terminal",
+    "subtitle": "Zero Trust Web Portal",
+    "tech": ["Next.js", "PostgreSQL", "Laravel"],
+    "timeline": "Q3 - Q4 2026",
+    "shape": "torus",
+    "position": [2.5, 0.2, 0.8]
+  }
+]

@@ -45,6 +45,11 @@ export interface MascotConfig {
   rotation?: [number, number, number];
   scale?: number;
   visible: boolean;
+  animationState?: "idle" | "wave" | "point";
+  lookTarget?: "camera" | "cursor" | [number, number, number];
+  color?: string;
+  opacity?: number;
+  modelPath?: string;
 }
 
 export interface PostProcessingConfig {

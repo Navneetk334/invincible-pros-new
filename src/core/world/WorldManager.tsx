@@ -11,6 +11,8 @@ import SharedAICore from "./shared/SharedAICore";
 import SharedMascot from "./shared/SharedMascot";
 import SharedPostProcessing from "./shared/SharedPostProcessing";
 import SharedFog from "./shared/SharedFog";
+import EnvironmentalAudio from "../audio/EnvironmentalAudio";
+import StoryEngine from "../story/StoryEngine";
 
 export default function WorldManager() {
   const activeWorldId = useWorldStore((state) => state.activeWorldId);
@@ -50,6 +52,8 @@ export default function WorldManager() {
       <SharedMascot />
       <SharedPostProcessing />
       <SharedFog />
+      <EnvironmentalAudio />
+      <StoryEngine />
 
       {/* Dynamic Worlds Lifecycle */}
       <Suspense fallback={null}>

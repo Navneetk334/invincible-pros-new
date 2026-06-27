@@ -12,7 +12,7 @@ export default function SharedLighting() {
   const dirRef = useRef<THREE.DirectionalLight>(null);
   const pointRef = useRef<THREE.PointLight>(null);
 
-  useFrame(() => {
+  useFrame((state) => {
     if (!ambientRef.current || !dirRef.current || !pointRef.current) return;
 
     // Target color interpolation
@@ -39,6 +39,14 @@ export default function SharedLighting() {
       pointRef.current.intensity,
       lightingConfig.intensity * 0.25,
       0.05
+    );
+
+    // Key light follows camera shifts dynamically (offset by [4, 10, 4])
+    const camPos = state.camera.position;
+    dirRef.current.position.set(
+      camPos.x + 4.0,
+      10.0,
+      camPos.z + 4.0
     );
   });
 

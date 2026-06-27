@@ -52,18 +52,40 @@ export default function CinematicCamera() {
     
     // 1. Evaluate base position along spline
     const basePos = splineCurve.getPointAt(scrollProgress);
-    cam.position.copy(basePos);
-
-    // 2. Resolve interpolated parameter nodes
     const { target, fov, shakeIntensity } = interpolateWaypointParams(scrollProgress);
 
-    // 3. Apply low-frequency mouse movement parallax offset (orbit/pan)
+    // Retrieve active focus variables from state store
+    const focusTarget = useCameraStore.getState().focusTarget;
+    const focusPosition = useCameraStore.getState().focusPosition;
+    const focusFov = useCameraStore.getState().focusFov;
+    const focusProgress = useCameraStore.getState().focusProgress;
+
+    // 2. Interpolate base position (either spline path or focused interpolate)
+    if (focusProgress > 0 && focusPosition && focusTarget) {
+      const targetPos = new THREE.Vector3(...focusPosition);
+      cam.position.copy(basePos).lerp(targetPos, focusProgress);
+    } else {
+      cam.position.copy(basePos);
+    }
+
+    // 3. Resolve lookAt interpolation smoothly
+    const targetVector = new THREE.Vector3(...target);
+    if (focusProgress > 0 && focusTarget) {
+      const targetLookAt = new THREE.Vector3(...focusTarget);
+      lookAtRef.current.copy(targetVector).lerp(targetLookAt, focusProgress);
+      cam.lookAt(lookAtRef.current);
+    } else {
+      lookAtRef.current.lerp(targetVector, 0.08);
+      cam.lookAt(lookAtRef.current);
+    }
+
+    // 4. Apply low-frequency mouse movement parallax offset (orbit/pan)
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(cam.quaternion);
     const up = new THREE.Vector3(0, 1, 0).applyQuaternion(cam.quaternion);
     cam.position.addScaledVector(right, state.pointer.x * 0.3);
     cam.position.addScaledVector(up, state.pointer.y * 0.3);
 
-    // 4. Apply high-frequency pseudo-random camera shake (sinusoidal combinations)
+    // 5. Apply high-frequency pseudo-random camera shake (sinusoidal combinations)
     const activeShake = shakeIntensity * shakeIntensityMultiplier * (isScrolling ? 1.3 : 1.0);
     if (shakeEnabled && activeShake > 0) {
       const jitterX = (Math.sin(time * 16) * 0.012 + Math.cos(time * 26) * 0.006) * activeShake;
@@ -72,17 +94,21 @@ export default function CinematicCamera() {
       cam.position.addScaledVector(up, jitterY);
     }
 
-    // 5. Update lookAt targets smoothly
-    const targetVector = new THREE.Vector3(...target);
-    lookAtRef.current.lerp(targetVector, 0.08);
-    cam.lookAt(lookAtRef.current);
-
     // 6. Handle Field-of-View transitions safely
     if ("fov" in cam) {
       const perspectiveCamera = cam as THREE.PerspectiveCamera;
-      if (Math.abs(perspectiveCamera.fov - fov) > 0.01) {
-        perspectiveCamera.fov = fov;
+      const targetFov = (focusProgress > 0 && focusFov) ? focusFov : fov;
+      if (Math.abs(perspectiveCamera.fov - targetFov) > 0.01) {
+        perspectiveCamera.fov = THREE.MathUtils.lerp(perspectiveCamera.fov, targetFov, 0.08);
         perspectiveCamera.updateProjectionMatrix();
+      }
+    }
+
+    // 7. Direct DOM telemetry updates for high performance 60 FPS feedback
+    if (typeof window !== "undefined") {
+      const el = document.getElementById("hud-cam-coords");
+      if (el) {
+        el.textContent = `${cam.position.x.toFixed(2)}, ${cam.position.y.toFixed(2)}, ${cam.position.z.toFixed(2)}`;
       }
     }
   });

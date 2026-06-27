@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useWorldStore } from "@core/world/use-world-store";
+import ProjectGallery from "../../gallery/canvas/ProjectGallery";
 
 interface WorldSceneProps {
   isExiting?: boolean;
@@ -25,15 +26,7 @@ export default function CRMWorld({ opacity = 1 }: WorldSceneProps) {
 
   return (
     <group name="world-crm">
-      {/* Mock database cylinders represent relational CRM stacks */}
-      <mesh position={[3, -1.5, -2]}>
-        <cylinderGeometry args={[1, 1, 1.5, 12]} />
-        <meshStandardMaterial color="#27272a" transparent opacity={opacity} wireframe />
-      </mesh>
-      <mesh position={[1, -1.5, -4]}>
-        <cylinderGeometry args={[0.8, 0.8, 1, 12]} />
-        <meshStandardMaterial color="#27272a" transparent opacity={opacity} wireframe />
-      </mesh>
+      <ProjectGallery opacity={opacity} />
     </group>
   );
 }

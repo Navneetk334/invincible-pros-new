@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useWorldStore } from "@core/world/use-world-store";
+import EngineeringShowcase from "../../showcase/canvas/EngineeringShowcase";
 
 interface WorldSceneProps {
   isExiting?: boolean;
@@ -25,15 +26,7 @@ export default function ITInfraWorld({ opacity = 1 }: WorldSceneProps) {
 
   return (
     <group name="world-it-infra">
-      {/* Visual blocks representing server rows */}
-      <mesh position={[-3, -1.5, -2]}>
-        <boxGeometry args={[3, 1, 0.5]} />
-        <meshStandardMaterial color="#101010" transparent opacity={opacity} wireframe />
-      </mesh>
-      <mesh position={[-3, -1.5, -3.5]}>
-        <boxGeometry args={[3, 1, 0.5]} />
-        <meshStandardMaterial color="#101010" transparent opacity={opacity} wireframe />
-      </mesh>
+      <EngineeringShowcase opacity={opacity} />
     </group>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useWorldStore } from "@core/world/use-world-store";
+import WebDevFactory from "../../web-dev/canvas/WebDevFactory";
 
 interface WorldSceneProps {
   isExiting?: boolean;
@@ -9,7 +10,11 @@ interface WorldSceneProps {
   opacity?: number;
 }
 
-export default function WebDevWorld({ opacity = 1 }: WorldSceneProps) {
+export default function WebDevWorld({
+  opacity = 1,
+  transitionProgress = 0,
+  isExiting = false,
+}: WorldSceneProps) {
   const setSharedConfig = useWorldStore((state) => state.setSharedConfig);
 
   useEffect(() => {
@@ -25,18 +30,11 @@ export default function WebDevWorld({ opacity = 1 }: WorldSceneProps) {
 
   return (
     <group name="world-web-dev">
-      {/* Mock structures representing development code arrays */}
-      <mesh position={[0, -1, 0]}>
-        <gridHelper args={[10, 10, "#1e293b", "#0f172a"]} />
-      </mesh>
-      <mesh position={[-2, 0.5, -2]}>
-        <boxGeometry args={[0.8, 0.8, 0.8]} />
-        <meshStandardMaterial color="#101010" transparent opacity={opacity} wireframe />
-      </mesh>
-      <mesh position={[2, 0.5, -3]}>
-        <boxGeometry args={[0.5, 0.5, 0.5]} />
-        <meshStandardMaterial color="#101010" transparent opacity={opacity} wireframe />
-      </mesh>
+      <WebDevFactory
+        opacity={opacity}
+        transitionProgress={transitionProgress}
+        isExiting={isExiting}
+      />
     </group>
   );
 }

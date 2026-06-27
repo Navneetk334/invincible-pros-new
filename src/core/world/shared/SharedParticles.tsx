@@ -39,10 +39,37 @@ export default function SharedParticles() {
     const time = state.clock.getElapsedTime();
     
     // Slow ambient rotation offset
-    pointsRef.current.rotation.y = time * 0.015 * particlesConfig.speed;
+    pointsRef.current.rotation.y = time * 0.01 * particlesConfig.speed;
     
     // Parallax translation driven by scroll
     pointsRef.current.position.y = -scrollProgress * 2.5;
+
+    // Apply continuous dynamic wind/airflow drift to individual coordinates
+    const geom = pointsRef.current.geometry;
+    const posAttr = geom.getAttribute("position") as THREE.BufferAttribute;
+    if (posAttr) {
+      const arr = posAttr.array as Float32Array;
+      for (let i = 0; i < count; i++) {
+        const idx = i * 3;
+        const py = arr[idx + 1];
+        
+        // Simulates aerodynamic drift (wind noise)
+        const windX = Math.sin(time * 0.2 + py * 0.4) * 0.003 * particlesConfig.speed;
+        const windZ = Math.cos(time * 0.15 + py * 0.3) * 0.002 * particlesConfig.speed;
+        
+        arr[idx] += windX;
+        arr[idx + 2] += windZ;
+
+        // Bound constraints wrapping to contain point cloud within -7.5 to 7.5 box
+        if (Math.abs(arr[idx]) > 7.5) {
+          arr[idx] = -Math.sign(arr[idx]) * 7.5;
+        }
+        if (Math.abs(arr[idx + 2]) > 7.5) {
+          arr[idx + 2] = -Math.sign(arr[idx + 2]) * 7.5;
+        }
+      }
+      posAttr.needsUpdate = true;
+    }
 
     // Smoothly interpolate configuration values
     const targetColor = new THREE.Color(particlesConfig.color);
