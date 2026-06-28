@@ -11,6 +11,8 @@ import MobileLab from "./MobileLab";
 import { DefaultAssemblyShowcase } from "./DeviceAssembly";
 import LiveAppPreview from "./LiveAppPreview";
 import DeviceSyncEngine from "./DeviceSyncEngine";
+import MobileInteractionLayer from "./MobileInteractionLayer";
+import AITransitionEngine from "./AITransitionEngine";
 
 interface FactoryProps {
   opacity: number;
@@ -409,25 +411,39 @@ export default function MobileAppFactory({
 }: FactoryProps) {
   const transitionGroupRef = useRef<THREE.Group>(null);
 
-  // Unfolding entry transformation mapping 0.5 -> 1.0 transition progress
+  // Entry: unfold from AI Core. Exit: collapse all devices toward AI Core, transmitting knowledge.
   useFrame(() => {
     if (transitionGroupRef.current) {
       if (!isExiting && transitionProgress > 0) {
+        // ── Entry: unfold from AI Core position ──
         const unfoldFactor = Math.min(Math.max((transitionProgress - 0.5) * 2.0, 0.0), 1.0);
-
-        // Lerp position from AI Core [0, 2.0, -3.0] to final factory slot [0, 0.0, 0.0]
         const startPos = new THREE.Vector3(0, 2.0, -3.0);
         const finalPos = new THREE.Vector3(0, 0.0, 0.0);
         transitionGroupRef.current.position.lerpVectors(startPos, finalPos, unfoldFactor);
-
-        // Scale expands from 0.01 to 1.0
         const startScale = new THREE.Vector3(0.01, 0.01, 0.01);
         const finalScale = new THREE.Vector3(1, 1, 1);
         transitionGroupRef.current.scale.lerpVectors(startScale, finalScale, unfoldFactor);
+        transitionGroupRef.current.rotation.set(0, 0, 0);
+      } else if (isExiting) {
+        // ── Exit: entire mobile world contracts toward AI Core ──
+        // Progress remap: factory collapses in the first 60% of the transition
+        const collapseT = Math.min(Math.max(transitionProgress * 1.65, 0.0), 1.0);
+        const eased = collapseT * collapseT * (3 - 2 * collapseT); // smoothstep
+
+        // Translate toward AI Core position
+        const finalPos = new THREE.Vector3(0, 2.0, -3.0);
+        transitionGroupRef.current.position.lerpVectors(new THREE.Vector3(0, 0, 0), finalPos, eased);
+
+        // Scale collapses from 1.0 down to 0.0
+        const s = 1.0 - eased;
+        transitionGroupRef.current.scale.set(s, s, s);
+
+        // Slow spin while collapsing
+        transitionGroupRef.current.rotation.y = eased * Math.PI * 1.5;
       } else {
-        // Reset transforms
         transitionGroupRef.current.position.set(0, 0, 0);
         transitionGroupRef.current.scale.set(1, 1, 1);
+        transitionGroupRef.current.rotation.set(0, 0, 0);
       }
     }
   });
@@ -436,41 +452,51 @@ export default function MobileAppFactory({
   const unfoldFactor = isExiting ? 1.0 : Math.min(Math.max((transitionProgress - 0.5) * 2.0, 0.0), 1.0);
 
   return (
-    <group ref={transitionGroupRef} name="mobile-app-factory">
-      {/* Base Grid helper */}
-      <gridHelper args={[24, 24, "#0f0f12", "#08080a"]} position={[0, -1.2, 0]} />
+    <>
+      <group ref={transitionGroupRef} name="mobile-app-factory">
+        {/* Base Grid helper */}
+        <gridHelper args={[24, 24, "#0f0f12", "#08080a"]} position={[0, -1.2, 0]} />
 
-      {/* 1. Device Preview Cluster (Android, iOS, Tablet aspect displays) */}
-      <MobilePreviewDevice position={[-2.2, 0.4, -1.5]} aspectRatio={0.562} label="Android build" scale={0.95} opacity={opacity} unfoldFactor={unfoldFactor} />
-      <MobilePreviewDevice position={[0, 0.2, 0]} aspectRatio={0.48} label="iOS main build" scale={1.0} opacity={opacity} unfoldFactor={unfoldFactor} />
-      <MobilePreviewDevice position={[2.2, 0.6, -1.2]} aspectRatio={0.75} label="Tablet build" scale={1.05} opacity={opacity} unfoldFactor={unfoldFactor} />
+        {/* 1. Device Preview Cluster (Android, iOS, Tablet aspect displays) */}
+        <MobilePreviewDevice position={[-2.2, 0.4, -1.5]} aspectRatio={0.562} label="Android build" scale={0.95} opacity={opacity} unfoldFactor={unfoldFactor} />
+        <MobilePreviewDevice position={[0, 0.2, 0]} aspectRatio={0.48} label="iOS main build" scale={1.0} opacity={opacity} unfoldFactor={unfoldFactor} />
+        <MobilePreviewDevice position={[2.2, 0.6, -1.2]} aspectRatio={0.75} label="Tablet build" scale={1.05} opacity={opacity} unfoldFactor={unfoldFactor} />
 
-      {/* 2. Holographic Navigation/Widget State tree */}
-      <WidgetStateTree position={[-2.4, 0.8, 1.2]} scale={1.0} opacity={opacity} />
+        {/* 2. Holographic Navigation/Widget State tree */}
+        <WidgetStateTree position={[-2.4, 0.8, 1.2]} scale={1.0} opacity={opacity} />
 
-      {/* 3. Interactive State Testing Prototype console */}
-      <PrototypeConsole position={[2.5, -0.4, 1.4]} scale={0.9} opacity={opacity} />
+        {/* 3. Interactive State Testing Prototype console */}
+        <PrototypeConsole position={[2.5, -0.4, 1.4]} scale={0.9} opacity={opacity} />
 
-      {/* 4. API payload particle stream pipes */}
-      <APIPacketRails position={[-1.2, 0.2, -0.6]} opacity={opacity} />
-      <APIPacketRails position={[1.2, 0.2, -0.6]} opacity={opacity} />
+        {/* 4. API payload particle stream pipes */}
+        <APIPacketRails position={[-1.2, 0.2, -0.6]} opacity={opacity} />
+        <APIPacketRails position={[1.2, 0.2, -0.6]} opacity={opacity} />
 
-      {/* 5. Engineering Laboratory Environment */}
-      <MobileLab opacity={opacity} />
+        {/* 5. Engineering Laboratory Environment */}
+        <MobileLab opacity={opacity} />
 
-      {/* 6. Device Assembly Showcase (precision robotics staging) */}
-      <group position={[0, 0, 4.5]}>
-        <DefaultAssemblyShowcase opacity={opacity} />
+        {/* 6. Device Assembly Showcase (precision robotics staging) */}
+        <group position={[0, 0, 4.5]}>
+          <DefaultAssemblyShowcase opacity={opacity} />
+        </group>
+
+        {/* 7. Live Application Preview Engine */}
+        <LiveAppPreview opacity={opacity} />
+
+        {/* 8. Device Synchronization Engine */}
+        <group position={[0, 0.2, 12.5]}>
+          <DeviceSyncEngine opacity={opacity} />
+        </group>
+
+        {/* 9. Mobile Interaction Layer — rotation, expand, notifications, prototype, sync observer */}
+        <MobileInteractionLayer opacity={opacity} />
       </group>
 
-      {/* 7. Live Application Preview Engine */}
-      <LiveAppPreview opacity={opacity} />
-
-      {/* 8. Device Synchronization Engine */}
-      <group position={[0, 0.2, 12.5]}>
-        <DeviceSyncEngine opacity={opacity} />
-      </group>
-    </group>
+      {/* Cinematic AI Transition Engine — renders during exit, outside collapsing group */}
+      {isExiting && (
+        <AITransitionEngine transitionProgress={transitionProgress} opacity={opacity} />
+      )}
+    </>
   );
 }
 export { MobileAppFactory };
