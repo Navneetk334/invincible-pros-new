@@ -10,6 +10,7 @@ import { useInteractiveObject } from "@core/interaction/use-interaction";
 import MobileLab from "./MobileLab";
 import { DefaultAssemblyShowcase } from "./DeviceAssembly";
 import LiveAppPreview from "./LiveAppPreview";
+import DeviceSyncEngine from "./DeviceSyncEngine";
 
 interface FactoryProps {
   opacity: number;
@@ -464,6 +465,11 @@ export default function MobileAppFactory({
 
       {/* 7. Live Application Preview Engine */}
       <LiveAppPreview opacity={opacity} />
+
+      {/* 8. Device Synchronization Engine */}
+      <group position={[0, 0.2, 12.5]}>
+        <DeviceSyncEngine opacity={opacity} />
+      </group>
     </group>
   );
 }
