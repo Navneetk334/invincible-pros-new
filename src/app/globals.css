@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #050505;
+  --color-surface: #101010;
+  --color-accent: #E5E5E5;
+  --color-accent-muted: #86868B;
+  --color-border-subtle: rgba(229, 229, 229, 0.04);
+
+  --font-sans: var(--font-inter), "Inter", sans-serif;
+  --font-display: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --font-mono: var(--font-geist-mono), "Geist Mono", monospace;
+  
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background-color: #050505;
+  color: #E5E5E5;
+  font-family: var(--font-inter), "Inter", sans-serif;
+  min-height: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: none; /* Hide default scrollbar for Firefox */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Hide default scrollbar for Chrome, Safari, and Opera */
+}
+
+/* Custom transitions and helper utility classes */
+.interactive-element {
+  pointer-events: auto;
+}
+
+.ambient-element {
+  pointer-events: none;
+}
+
+/* Repeating engineering grid line grids */
+.bg-grid-pattern {
+  background-size: 30px 30px, 120px 120px;
+  background-image: 
+    linear-gradient(to right, rgba(229, 229, 229, 0.012) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(229, 229, 229, 0.012) 1px, transparent 1px),
+    linear-gradient(to right, rgba(229, 229, 229, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(229, 229, 229, 0.025) 1px, transparent 1px);
+}
+
+/* Mouse-tracked spotlight lighting gradient */
+.bg-spotlight-radial {
+  background: radial-gradient(
+    800px circle at var(--mouse-x) var(--mouse-y),
+    rgba(229, 229, 229, 0.035),
+    transparent 60%
+  );
+}
+
+/* Animated SVG lines offset dash */
+@keyframes strokeDashMove {
+  to {
+    stroke-dashoffset: -60;
+  }
+}
+
+.stroke-dash-move {
+  animation: strokeDashMove 2s linear infinite;
+  will-change: stroke-dashoffset;
+}
